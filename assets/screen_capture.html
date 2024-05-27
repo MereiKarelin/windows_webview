@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screen Capture</title>
+</head>
+
+<body>
+    <h1>Screen Capture Example</h1>
+    <button id="capture-btn" onclick="captureScreen()">Capture Screen</button>
+    <script>
+        async function captureScreen() {
+            try {
+                const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.play();
+
+                video.onloadedmetadata = async () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    const context = canvas.getContext('2d');
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    const dataURL = canvas.toDataURL('image/png');
+                    window.screenshotHandler.postMessage(dataURL);
+
+                    video.srcObject.getTracks().forEach(track => track.stop());
+                };
+            } catch (err) {
+                console.error('Error: ' + err);
+            }
+        }
+    </script>
+</body>
+
+</html>
