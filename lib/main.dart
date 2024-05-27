@@ -202,7 +202,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _takeScreenshot() async {
-    final screenshot = await captureHtmlScreenshot('''
+    _screenshot = await captureHtmlScreenshot('''
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -373,7 +373,7 @@ class _MyAppState extends State<MyApp> {
 </html>
     ''');
     setState(() {
-      _screenshot = screenshot;
+      // _screenshot = _screenshot;
     });
   }
 
@@ -386,16 +386,7 @@ class _MyAppState extends State<MyApp> {
         ),
         body: Column(
           children: [
-            Expanded(
-              child: Screenshot(
-                controller: _webviewScreenshot.screenshotController,
-                child: Container(
-                  width: 800,
-                  height: 600,
-                  child: Webview(_webviewScreenshot.controller),
-                ),
-              ),
-            ),
+            _screenshot != null ? Image.memory(_screenshot!) : const SizedBox(),
             ElevatedButton(
               onPressed: _takeScreenshot,
               child: Text('TakeScreenshot'),
