@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:webview_windows/webview_windows.dart';
 import 'package:windows_webview/webview.dart';
 
 void main() {
@@ -24,9 +26,6 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _initializeWebview() async {
     await _webviewScreenshot.initialize();
-  }
-
-  Future<void> _takeScreenshot() async {
     String htmlContent = '''
 <!DOCTYPE html>
 <html lang="en">
@@ -197,7 +196,11 @@ class _MyAppState extends State<MyApp> {
 </body>
 </html>
     ''';
-    final screenshot = await _webviewScreenshot.getScreenshotFromHtml(htmlContent);
+    await _webviewScreenshot.loadHtmlContent(htmlContent);
+  }
+
+  Future<void> _takeScreenshot() async {
+    final screenshot = await _webviewScreenshot.captureScreenshot();
     setState(() {
       _screenshot = screenshot;
     });
@@ -210,18 +213,24 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: Text('HTML to Screenshot Example'),
         ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (_screenshot != null) Image.memory(_screenshot!) else Text('No screenshot available'),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _takeScreenshot,
-                child: Text('Take Screenshot'),
+        body: Column(
+          children: [
+            Expanded(
+              child: Screenshot(
+                controller: _webviewScreenshot.screenshotController,
+                child: Container(
+                  width: 800,
+                  height: 600,
+                  child: Webview(_webviewScreenshot.controller),
+                ),
               ),
-            ],
-          ),
+            ),
+            ElevatedButton(
+              onPressed: _takeScreenshot,
+              child: Text('TakeScreenshot'),
+            ),
+            if (_screenshot != null) Image.memory(_screenshot!),
+          ],
         ),
       ),
     );
