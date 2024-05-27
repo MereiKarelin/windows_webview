@@ -22,8 +22,17 @@ class _MyAppState extends State<MyApp> {
     super.initState();
   }
 
-  Future<void> _takeScreenshot() async {
-    _screenshot = await captureHtmlScreenshot('''
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('HTML to Screenshot Example'),
+        ),
+        body: Column(
+          children: [
+            WebViewScreenshotWidget(
+              htmlContent: '''
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -192,27 +201,8 @@ class _MyAppState extends State<MyApp> {
     </div>
 </body>
 </html>
-    ''');
-    setState(() {
-      // _screenshot = _screenshot;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('HTML to Screenshot Example'),
-        ),
-        body: Column(
-          children: [
-            _screenshot != null ? Image.memory(_screenshot!) : const SizedBox(),
-            ElevatedButton(
-              onPressed: _takeScreenshot,
-              child: Text('TakeScreenshot'),
-            ),
-            if (_screenshot != null) Image.memory(_screenshot!),
+    ''',
+            )
           ],
         ),
       ),
