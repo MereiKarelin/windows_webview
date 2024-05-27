@@ -202,7 +202,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _takeScreenshot() async {
-    final screenshot = await renderHtmlToImage('''<html lang="en">
+    final screenshot = await captureHtmlScreenshot('''
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -367,7 +369,9 @@ class _MyAppState extends State<MyApp> {
         <hr />
         <hr />
     </div>
-</body>''');
+</body>
+</html>
+    ''');
     setState(() {
       _screenshot = screenshot;
     });

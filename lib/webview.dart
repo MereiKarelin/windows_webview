@@ -33,54 +33,25 @@ class WebviewScreenshot {
   ScreenshotController get screenshotController => _screenshotController;
 }
 
-Future<Uint8List?> renderHtmlToImage(String htmlContent) async {
-  final WebviewController controller = WebviewController();
-  await controller.initialize();
-  final completer = Completer<Uint8List?>();
+Future<Uint8List?> captureHtmlScreenshot(String htmlContent) async {
+  final webviewScreenshot = WebviewScreenshot();
 
-  controller.webMessage.listen((message) {
-    if (message.message.containsKey('screenshot')) {
-      final base64image = message.message['screenshot'];
-      final bytes = base64Decode(base64image.split(',').last);
-      completer.complete(bytes);
-    }
-  });
+  try {
+    // Инициализация веб-вью
+    await webviewScreenshot.initialize();
 
-  await controller.loadStringContent(
-    '''
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Screenshot</title>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
-        <script>
-          function captureScreenshot() {
-            html2canvas(document.body).then(canvas => {
-              const base64image = canvas.toDataURL('image/png');
-              window.chrome.webview.postMessage({screenshot: base64image});
-            }).catch(err => {
-              console.error('Error capturing screenshot:', err);
-              window.chrome.webview.postMessage({error: err.toString()});
-            });
-          }
+    // Загрузка HTML-кода в веб-вью
+    await webviewScreenshot.loadHtmlContent(htmlContent);
 
-          document.addEventListener('DOMContentLoaded', (event) => {
-            captureScreenshot();
-          });
-        </script>
-      </head>
-      <body>
-        $htmlContent
-      </body>
-      </html>
-    ''',
-  );
+    // Ожидание завершения загрузки и рендеринга HTML-кода
+    await Future.delayed(Duration(seconds: 5)); // Время для загрузки и рендеринга HTML-кода, можно настроить по необходимости
 
-  controller.webMessage.listen((message) {
-    if (message.message.containsKey('error')) {
-      completer.completeError(Exception(message.message['error']));
-    }
-  });
+    // Захват скриншота
+    final screenshot = await webviewScreenshot.captureScreenshot();
 
-  return await completer.future;
+    return screenshot;
+  } catch (e) {
+    print('Error capturing HTML screenshot: $e');
+    return null;
+  }
 }
