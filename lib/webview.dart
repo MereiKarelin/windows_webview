@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:screenshot/screenshot.dart';
 import 'package:webview_win_floating/webview.dart';
 
 Future<Uint8List?> captureHtmlScreenshot(String htmlContent) async {
@@ -10,8 +13,30 @@ Future<Uint8List?> captureHtmlScreenshot(String htmlContent) async {
   try {
     await webviewController.loadHtmlString(htmlContent);
 
+    MediaQuery(
+      child: MaterialApp(
+        home: Scaffold(
+          body: WinWebViewWidget(
+            controller: webviewController,
+          ),
+        ),
+      ),
+      data: MediaQueryData(),
+    ).debugFillProperties(DiagnosticPropertiesBuilder());
+
+    ScreenshotController.widgetToUiImage(MediaQuery(
+      child: MaterialApp(
+        home: Scaffold(
+          body: WinWebViewWidget(
+            controller: webviewController,
+          ),
+        ),
+      ),
+      data: MediaQueryData(),
+    ));
+
     // Ожидание завершения загрузки и рендеринга HTML-кода
-    await Future.delayed(const Duration(seconds: 5));
+    await Future.delayed(const Duration(seconds: 3));
 
     // Захват скриншота
     final screenshot = await webviewController.runJavaScriptReturningResult('''
