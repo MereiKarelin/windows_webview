@@ -3,7 +3,9 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  fullscreen_window
   webview_universal
+  webview_win_floating
   webview_windows
 )
 

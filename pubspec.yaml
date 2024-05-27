@@ -38,6 +38,7 @@ dependencies:
   webview_universal: ^0.0.5
   screenshot: ^3.0.0
   webview_windows: ^0.4.0
+  webview_win_floating: ^2.2.3
 
 dev_dependencies:
   flutter_test:
