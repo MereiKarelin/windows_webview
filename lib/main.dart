@@ -45,52 +45,11 @@ class _WebViewExampleState extends State<WebViewExample> {
       });
 
       _webview.setBrightness(Brightness.dark);
-      _webview.addOnWebMessageReceivedCallback((message) {
-        _processScreenshot(message);
-      });
 
-      String htmlString = '''<!DOCTYPE html>
-
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Screen Capture</title>
-</head>
-<body>
-    <h1>Screen Capture Example</h1>
-    <button id="capture-btn" onclick="captureScreen()">Capture Screen</button>
-    <script>
-        async function captureScreen() {
-            try {
-                const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-                const video = document.createElement('video');
-                video.srcObject = stream;
-                video.play();
-
-                video.onloadedmetadata = async () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    const context = canvas.getContext('2d');
-                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                    const dataURL = canvas.toDataURL('image/png');
-                    window.chrome.webview.postMessage(dataURL);
-
-                    video.srcObject.getTracks().forEach(track => track.stop());
-                };
-            } catch (err) {
-                console.error('Error: ' + err);
-            }
-        }
-    </script>
-</body>
-</html>
-
-''';
+      // Load the HTML content
+      String htmlContent = await rootBundle.loadString('assets/screen_capture.html');
       _webview.launch(Uri.dataFromString(
-        htmlString,
+        htmlContent,
         mimeType: 'text/html',
         encoding: Encoding.getByName('utf-8'),
       ).toString());
@@ -107,7 +66,7 @@ class _WebViewExampleState extends State<WebViewExample> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (_isWebViewInitialized) {
-            _webview.evaluateJavaScript('captureScreen();');
+            _captureScreen();
           }
         },
         child: const Icon(Icons.camera),
@@ -115,7 +74,39 @@ class _WebViewExampleState extends State<WebViewExample> {
     );
   }
 
-  void _processScreenshot(String screenshotData) {
-    print('Screenshot received: $screenshotData');
+  Future<void> _captureScreen() async {
+    try {
+      // JavaScript code to capture the screen
+      final String jsCode = '''
+        (async function() {
+          try {
+            const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+            const video = document.createElement('video');
+            video.srcObject = stream;
+            video.play();
+
+            video.onloadedmetadata = async () => {
+              const canvas = document.createElement('canvas');
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              const context = canvas.getContext('2d');
+              context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+              const dataURL = canvas.toDataURL('image/png');
+              window.screenshotHandler.postMessage(dataURL);
+
+              video.srcObject.getTracks().forEach(track => track.stop());
+            };
+          } catch (err) {
+            console.error('Error: ' + err);
+          }
+        })();
+      ''';
+
+      // Execute JavaScript code in the WebView
+      await _webview.evaluateJavaScript(jsCode);
+    } catch (e) {
+      print('Error capturing screen: $e');
+    }
   }
 }
