@@ -22,16 +22,11 @@ class _MyAppState extends State<MyApp> {
     super.initState();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('HTML to Screenshot Example'),
-        ),
-        body: Column(
-          children: [
-            WebViewScreenshotWidget(
+  Future<void> showModal(BuildContext context) async {
+    await Future.delayed(Duration(seconds: 4));
+    showModalBottomSheet(
+        context: context,
+        builder: (context) => WebViewScreenshotWidget(
               htmlContent: '''
 <!DOCTYPE html>
 <html lang="en">
@@ -202,7 +197,21 @@ class _MyAppState extends State<MyApp> {
 </body>
 </html>
     ''',
-            )
+            ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('HTML to Screenshot Example'),
+        ),
+        body: Column(
+          children: [
+            // WebViewScreenshotWidget(
+            //   htmlContent: ,
+            // )
           ],
         ),
       ),
