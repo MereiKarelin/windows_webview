@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:universal_io/io.dart';
 import 'package:webview_universal/webview_desktop/webview_desktop.dart' as webview_desktop;
@@ -46,11 +45,12 @@ class _WebViewExampleState extends State<WebViewExample> {
       });
 
       _webview.setBrightness(Brightness.dark);
-      _webview.registerJavaScriptMessageHandler('screenshotHandler', (String name, dynamic body) {
-        print('Screenshot received: $body');
+      _webview.addOnWebMessageReceivedCallback((message) {
+        _processScreenshot(message);
       });
 
       String htmlString = '''<!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -76,7 +76,7 @@ class _WebViewExampleState extends State<WebViewExample> {
                     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
                     const dataURL = canvas.toDataURL('image/png');
-                    window.flutter_inappwebview.callHandler('screenshotHandler', dataURL);
+                    window.chrome.webview.postMessage(dataURL);
 
                     video.srcObject.getTracks().forEach(track => track.stop());
                 };
@@ -87,6 +87,7 @@ class _WebViewExampleState extends State<WebViewExample> {
     </script>
 </body>
 </html>
+
 ''';
       _webview.launch(Uri.dataFromString(
         htmlString,
@@ -100,17 +101,21 @@ class _WebViewExampleState extends State<WebViewExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('WebView Screen Capture'),
+        title: const Text('WebView Screen Capture'),
       ),
-      body: _isWebViewInitialized ? Container() : Center(child: CircularProgressIndicator()),
+      body: _isWebViewInitialized ? Container() : const Center(child: CircularProgressIndicator()),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (_isWebViewInitialized) {
             _webview.evaluateJavaScript('captureScreen();');
           }
         },
-        child: Icon(Icons.camera),
+        child: const Icon(Icons.camera),
       ),
     );
+  }
+
+  void _processScreenshot(String screenshotData) {
+    print('Screenshot received: $screenshotData');
   }
 }
