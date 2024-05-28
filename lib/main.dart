@@ -22,13 +22,15 @@ class _MyAppState extends State<MyApp> {
     super.initState();
   }
 
-  Future<void> showModal(BuildContext context) async {
-    await Future.delayed(Duration(seconds: 4));
-    showModalBottomSheet(
-        context: context,
-        builder: (context) => WebViewScreenshotWidget(
-              htmlContent: '''
-<!DOCTYPE html>
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+          appBar: AppBar(
+            title: Text('HTML to Screenshot Example'),
+          ),
+          body: WebViewScreenshotWidget(
+            htmlContent: '''<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -189,6 +191,21 @@ class _MyAppState extends State<MyApp> {
             document.getElementById('subdivision').innerHTML = prindata[0]['subdivision'];
             document.getElementById('printedDateTitle').innerHTML = prindata[0]['printedDateTitle'];
             document.getElementById('printedDate').innerHTML = prindata[0]['printedDate'] + '&nbsp;' + prindata[0]['printedTime'];
+
+            function takeScreenshot() {
+                html2canvas(document.getElementById('foo')).then(function(canvas) {
+                    canvas.toBlob(function(blob) {
+                        var reader = new FileReader();
+                        reader.onload = function(event) {
+                            window.screenshot = event.target.result;
+                        };
+                        reader.readAsDataURL(blob);
+                    });
+                });
+            }
+
+            // Call the function to take a screenshot
+            takeScreenshot();
         </script>
         <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.0.0-rc.5/dist/html2canvas.min.js" defer></script>
         <hr />
@@ -196,25 +213,10 @@ class _MyAppState extends State<MyApp> {
     </div>
 </body>
 </html>
-    ''',
-            ));
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('HTML to Screenshot Example'),
-        ),
-        body: Column(
-          children: [
-            // WebViewScreenshotWidget(
-            //   htmlContent: ,
-            // )
-          ],
-        ),
-      ),
+    ''',
+            onScreened: (Uint8List image) {},
+          )),
     );
   }
 }
