@@ -197,7 +197,7 @@ class _MyAppState extends State<MyApp> {
                     canvas.toBlob(function(blob) {
                         var reader = new FileReader();
                         reader.onload = function(event) {
-                            window.screenshot = event.target.result;
+                            window.screenshot.postMessage(event.target.result);
                         };
                         reader.readAsDataURL(blob);
                     });
@@ -213,7 +213,6 @@ class _MyAppState extends State<MyApp> {
     </div>
 </body>
 </html>
-
     ''',
             onScreened: (Uint8List image) {},
           )),
